@@ -41,15 +41,33 @@ app.get('/podcast/:id', async (req, res) => {
 		})
 		const parsedRSS = parser.parse(rssText)
 		let episodes = parsedRSS.rss?.channel?.item
-
 		episodes = Array.isArray(episodes) ? episodes : [episodes]
 
-		const normalizedEpisodes = episodes.map((episode: any) => ({
-			title: episode.title,
-			description: episode.description,
-			pubDate: episode.pubDate,
-			guidId: episode.guid?.['#text'] || null,
-		}))
+		const convertDuration = (value: any) => {
+			const rawDuration = value
+			let duration
+			if (typeof rawDuration === 'number') {
+				const secondsTotal = rawDuration
+				const secondsPerHour = 3600
+				const hours = Math.floor(secondsTotal / secondsPerHour)
+				const minutes = Math.floor((secondsTotal % secondsPerHour) / 60)
+				duration = `${hours > 0 ? `${hours}h ` : ''}${minutes}m`.trim()
+			} else {
+				duration = rawDuration
+			}
+			return duration
+		}
+
+		const normalizedEpisodes = episodes.map((episode: any) => {
+			return {
+				title: episode.title,
+				description: episode.description,
+				pubDate: episode.pubDate.slice(0, 16),
+				guidId: episode.guid?.['#text'] || null,
+				image: episode?.['itunes:image']?.['@_href'] || null,
+				duration: convertDuration(episode?.['itunes:duration']) ?? null,
+			}
+		})
 
 		res.json({
 			episodes: normalizedEpisodes,

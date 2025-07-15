@@ -63,7 +63,7 @@ app.get('/podcast/:id', async (req, res) => {
 				title: episode.title,
 				description: episode.description,
 				pubDate: episode.pubDate.slice(0, 16),
-				guidId: episode.guid?.['#text'] || null,
+				guid: episode.guid?.['#text'] || null,
 				audioURL: episode.enclosure?.['@_url'] || null,
 				image: episode?.['itunes:image']?.['@_href'] || null,
 				duration: convertDuration(episode?.['itunes:duration']) ?? null,

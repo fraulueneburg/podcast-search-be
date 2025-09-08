@@ -51,7 +51,8 @@ app.get('/podcast/:id', async (req, res) => {
 				const secondsPerHour = 3600
 				const hours = Math.floor(secondsTotal / secondsPerHour)
 				const minutes = Math.floor((secondsTotal % secondsPerHour) / 60)
-				duration = `${hours > 0 ? `${hours}h ` : ''}${minutes}m`.trim()
+				const seconds = secondsTotal % 60
+				duration = `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m` : `${minutes}:${seconds}m`}`.trim()
 			} else {
 				duration = rawDuration
 			}

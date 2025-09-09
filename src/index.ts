@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { XMLParser } from 'fast-xml-parser'
-import { convertDuration } from './utils/convertDuration'
+import { convertDuration, sanitizeHtmlString } from './utils'
 
 const app = express()
 const PORT = 3001
@@ -49,7 +49,7 @@ app.get('/podcast/:id', async (req, res) => {
 
 			return {
 				title: title,
-				description: episode.description,
+				description: sanitizeHtmlString(description),
 				pubDate: pubDate.slice(0, 16),
 				guid: guid?.['#text'] || null,
 				audioURL: enclosure?.['@_url'] || null,

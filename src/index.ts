@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { XMLParser } from 'fast-xml-parser'
+import { convertDuration } from './utils/convertDuration'
 
 const app = express()
 const PORT = 3001
@@ -43,32 +44,19 @@ app.get('/podcast/:id', async (req, res) => {
 		let episodes = parsedRSS.rss?.channel?.item
 		episodes = Array.isArray(episodes) ? episodes : [episodes]
 
-		const convertDuration = (value: any) => {
-			const rawDuration = value
-			let duration
-			if (typeof rawDuration === 'number') {
-				const secondsTotal = rawDuration
-				const secondsPerHour = 3600
-				const hours = Math.floor(secondsTotal / secondsPerHour)
-				const minutes = Math.floor((secondsTotal % secondsPerHour) / 60)
-				const seconds = secondsTotal % 60
-				duration = `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m` : `${minutes}:${seconds}m`}`.trim()
-			} else {
-				duration = rawDuration
-			}
-			return duration
-		}
+		const normalizedEpisodes = episodes.map((elem: any) => {
+			const { title, description, pubDate, guid, enclosure } = elem
 
-		const normalizedEpisodes = episodes.map((episode: any) => {
 			return {
-				title: episode.title,
+				title: title,
 				description: episode.description,
-				pubDate: episode.pubDate.slice(0, 16),
-				guid: episode.guid?.['#text'] || null,
-				audioURL: episode.enclosure?.['@_url'] || null,
-				image: episode?.['itunes:image']?.['@_href'] || null,
-				duration: convertDuration(episode?.['itunes:duration']) ?? null,
+				pubDate: pubDate.slice(0, 16),
+				guid: guid?.['#text'] || null,
+				audioURL: enclosure?.['@_url'] || null,
+				image: elem?.['itunes:image']?.['@_href'] || null,
+				duration: convertDuration(elem?.['itunes:duration']) ?? null,
 			}
+		})
 		})
 
 		res.json({
